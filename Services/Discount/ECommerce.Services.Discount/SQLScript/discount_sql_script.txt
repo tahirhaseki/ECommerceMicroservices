@@ -1,0 +1,7 @@
+﻿create table discount(
+id serial primary key,
+userid varchar(200) unique not null,
+rate smallint not null,
+code varchar(50) not null,
+crateddate timestamp not null default CURRENT_TIMESTAMP
+)

@@ -1,0 +1,58 @@
+﻿using ECommerce.Services.Discount.Services;
+using ECommerce.Shared.ControllerBases;
+using ECommerce.Shared.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ECommerce.Services.Discount.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class DiscountsController : CustomBaseController
+    {
+        private readonly IDiscountService _discountService;
+        private readonly ISharedIdentityService _identityService;
+
+        public DiscountsController(IDiscountService discountService, ISharedIdentityService ıdentityService)
+        {
+            _discountService = discountService;
+            _identityService = ıdentityService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return CreateActionResultInstance(await _discountService.GetAll());
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            return CreateActionResultInstance(await _discountService.GetById(id));
+        }
+        [HttpGet("GetByCode/{code}")]
+        public async Task<IActionResult> GetByCode(string code)
+        {
+            var userid = _identityService.GetUserId;
+            return CreateActionResultInstance(await _discountService.GetByCodeAndUserId(code, userid));
+        }
+        [HttpPut]
+        public async Task<IActionResult> Update(Models.Discount discount)
+        {
+            return CreateActionResultInstance(await _discountService.Update(discount));
+        }
+        [HttpPost]
+        public async Task<IActionResult> Save(Models.Discount discount)
+        {
+            return CreateActionResultInstance(await _discountService.Save(discount));
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            return CreateActionResultInstance(await _discountService.Delete(id));
+        }
+    }
+}
