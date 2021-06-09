@@ -21,6 +21,7 @@ namespace ECommerce.IdentityServer
                 new ApiResource("resource_discount"){Scopes={"discount_fullpermission"}},
                 new ApiResource("resource_order"){Scopes={"order_fullpermission"}},
                 new ApiResource("resource_payment"){Scopes={"payment_fullpermission"}},
+                new ApiResource("resource_gateway"){Scopes={"gateway_fullpermission"}},
                 new ApiResource(IdentityServerConstants.LocalApi.ScopeName)
 
             };
@@ -46,6 +47,7 @@ namespace ECommerce.IdentityServer
                 new ApiScope("discount_fullpermission","Discount Api Tam Erişim"),
                 new ApiScope("order_fullpermission","Order Api Tam Erişim"),
                 new ApiScope("payment_fullpermission","Payment Api Tam Erişim"),
+                new ApiScope("gateway_fullpermission","Gateway Api Tam Erişim"),
                 new ApiScope(IdentityServerConstants.LocalApi.ScopeName)
             };
 
@@ -60,6 +62,7 @@ namespace ECommerce.IdentityServer
                     AllowedGrantTypes=GrantTypes.ClientCredentials,
                     AllowedScopes={ "catalog_fullpermission","catalog_r_permission","catalog_we_permission", 
                                     "photo_stock_fullpermission","photo_stock_r_permission","photo_stock_we_permission",
+                                    "gateway_fullpermission",
                                     IdentityServerConstants.LocalApi.ScopeName}
                 },
                 new Client
@@ -77,7 +80,9 @@ namespace ECommerce.IdentityServer
                                    "basket_fullpermission",
                                    "discount_fullpermission",
                                    "order_fullpermission",
-                                   "payment_fullpermission"},
+                                   "payment_fullpermission",
+                                   "gateway_fullpermission"
+                    },
                     AccessTokenLifetime=1*60*60,
                     RefreshTokenExpiration=TokenExpiration.Absolute,
                     AbsoluteRefreshTokenLifetime=(int) (DateTime.Now.AddDays(60)-DateTime.Now).TotalSeconds,
