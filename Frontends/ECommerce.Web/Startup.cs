@@ -1,3 +1,5 @@
+using ECommerce.Shared.Services;
+using ECommerce.Web.Handlers;
 using ECommerce.Web.Models;
 using ECommerce.Web.Services;
 using ECommerce.Web.Services.Interfaces;
@@ -30,12 +32,22 @@ namespace ECommerce.Web
             services.Configure<ServiceApiSettings>(Configuration.GetSection("ServiceApiSettings"));
             services.Configure<ClientSettings>(Configuration.GetSection("ClientSettings"));
             services.AddHttpContextAccessor();
+            services.AddAccessTokenManagement();
             var serviceApiSettings = Configuration.GetSection("ServiceApiSettings").Get<ServiceApiSettings>();
 
+            services.AddScoped<ResourceOwnerPasswordTokenHandler>();
+            services.AddScoped<ClientCredentialTokenHandler>();
+
+            services.AddScoped<ISharedIdentityService, SharedIdentityService>();
             services.AddHttpClient<IIdentityService, IdentityService>();
+            services.AddHttpClient<IClientCredentialTokenService, ClientCredentialTokenService>();
+            services.AddHttpClient<ICatalogService, CatalogService>(options =>
+             {
+                 options.BaseAddress = new Uri($"{serviceApiSettings.GatewayBaseUri}/{serviceApiSettings.Catalog.Path}");
+             }).AddHttpMessageHandler<ClientCredentialTokenHandler>();
             services.AddHttpClient<IUserService, UserService>(options => {
                 options.BaseAddress = new Uri(serviceApiSettings.IdentityBaseUri);
-            });
+            }).AddHttpMessageHandler<ResourceOwnerPasswordTokenHandler>();
 
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
