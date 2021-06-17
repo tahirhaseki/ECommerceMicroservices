@@ -21,5 +21,7 @@ namespace ECommerce.Services.Basket.Services
         public void Connect() => _connectionMultiplexer = ConnectionMultiplexer.Connect($"{_host}:{_port}");
 
         public IDatabase GetDb(int db = 1) => _connectionMultiplexer.GetDatabase(db);
+
+        public IServer GetServer() => _connectionMultiplexer.GetServer(_host,_port);
     }
 }

@@ -1,6 +1,8 @@
+using ECommerce.Services.Basket.Consumer;
 using ECommerce.Services.Basket.Services;
 using ECommerce.Services.Basket.Settings;
 using ECommerce.Shared.Services;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -33,6 +35,30 @@ namespace ECommerce.Services.Basket
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMassTransit(x => {
+
+                x.AddConsumer<CourseNameChangedEventConsumer>();
+
+                // Default port is used. :5672
+                x.UsingRabbitMq((context, config) =>
+                {
+                    config.Host(Configuration["RabbitMqUrl"], "/", host =>
+                    {
+                        host.Username("guest");
+                        host.Password("guest");
+                    });
+
+                    config.ReceiveEndpoint("course-name-changed-event-basket-service", e => {
+                        e.ConfigureConsumer<CourseNameChangedEventConsumer>(context);
+                    });
+
+                });
+
+            });
+
+            services.AddMassTransitHostedService();
+
+
             var requireAuthorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

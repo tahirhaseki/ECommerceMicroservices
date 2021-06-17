@@ -30,9 +30,7 @@ namespace ECommerce.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Checkout(CheckoutInfoInput checkoutInfoInput)
         {
-            //1. yol senkron iletişim
-            //  var orderStatus = await _orderService.CreateOrder(checkoutInfoInput);
-            // 2.yol asenkron iletişim
+            // async communication using rabbitmq.
             var orderSuspend = await _orderService.SuspendOrder(checkoutInfoInput);
             if (!orderSuspend.IsSuccessful)
             {
@@ -44,10 +42,7 @@ namespace ECommerce.Web.Controllers
 
                 return View();
             }
-            //1. yol senkron iletişim
-            //  return RedirectToAction(nameof(SuccessfulCheckout), new { orderId = orderStatus.OrderId });
 
-            //2.yol asenkron iletişim
             return RedirectToAction(nameof(SuccessfulCheckout), new { orderId = new Random().Next(1, 1000) });
         }
 

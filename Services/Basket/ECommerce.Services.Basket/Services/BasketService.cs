@@ -16,7 +16,18 @@ namespace ECommerce.Services.Basket.Services
         {
             _redisService = redisService;
         }
+        public async Task<Response<List<BasketDto>>> GetAllBaskets()
+        {
+            var redisKeys = _redisService.GetServer().Keys(database: 1);
+            var baskets = new List<BasketDto>();
 
+            foreach (var key in redisKeys)
+            {
+                baskets.Add(GetBasket(key).Result.Data);
+            }
+
+            return Response<List<BasketDto>>.Success(baskets,200);
+        }
         public async Task<Response<BasketDto>> GetBasket(string userId)
         {
             var existBasket = await _redisService.GetDb().StringGetAsync(userId);

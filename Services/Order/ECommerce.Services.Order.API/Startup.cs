@@ -1,5 +1,7 @@
+using ECommerce.Services.Order.Application.Consumer;
 using ECommerce.Services.Order.Infrastructure;
 using ECommerce.Shared.Services;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -33,6 +35,33 @@ namespace ECommerce.Services.Order.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddMassTransit(x => {
+
+                x.AddConsumer<CreateOrderMessageCommandConsumer>();
+                x.AddConsumer<CourseNameChangedEventConsumer>();
+
+                // Default port is used. :5672
+                x.UsingRabbitMq((context, config) =>
+                {
+                    config.Host(Configuration["RabbitMqUrl"], "/", host =>
+                    {
+                        host.Username("guest");
+                        host.Password("guest");
+                    });
+
+                    config.ReceiveEndpoint("create-order-service", e => {
+                        e.ConfigureConsumer<CreateOrderMessageCommandConsumer>(context);
+                    });
+                    config.ReceiveEndpoint("course-name-changed-event-order-service", e => {
+                        e.ConfigureConsumer<CourseNameChangedEventConsumer>(context);
+                    });
+
+                });
+
+            });
+
+            services.AddMassTransitHostedService();
 
             var requireAuthorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
