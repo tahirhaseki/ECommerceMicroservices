@@ -28,7 +28,7 @@ namespace ECommerce.Services.PhotoStock.Controllers
                     await photo.CopyToAsync(stream,cancellationToken);
                 }
 
-                var returnPath = "Photos/" + photo.FileName;
+                var returnPath = photo.FileName;
 
                 PhotoDto photoDto = new() { Url = returnPath };
 
@@ -41,7 +41,7 @@ namespace ECommerce.Services.PhotoStock.Controllers
         [HttpDelete]
         public IActionResult PhotoDelete(string photoUrl)
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Photos", photoUrl);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/photos", photoUrl);
 
             if (!System.IO.File.Exists(path))
             {

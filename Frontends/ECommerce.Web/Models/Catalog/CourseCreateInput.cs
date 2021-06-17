@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,5 +20,7 @@ namespace ECommerce.Web.Models.Catalog
         public FeatureViewModel Feature { get; set; }
         [Display(Name = "Kurs Kategorisi")]
         public string CategoryId { get; set; }
+        [Display(Name = "Kurs Resmi")]
+        public IFormFile PhotoFormFile { get; set; }
     }
 }

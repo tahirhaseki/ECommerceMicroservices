@@ -1,4 +1,5 @@
 ﻿using ECommerce.Shared.Dtos;
+using ECommerce.Web.Helpers;
 using ECommerce.Web.Models.Catalog;
 using ECommerce.Web.Services.Interfaces;
 using System;
@@ -13,14 +14,26 @@ namespace ECommerce.Web.Services
     public class CatalogService : ICatalogService
     {
         private readonly HttpClient _httpClient;
+        private readonly IPhotoStockService _photoStockService;
+        private readonly PhotoHelper _photoHelper;
 
-        public CatalogService(HttpClient httpClient)
+        public CatalogService(HttpClient httpClient, IPhotoStockService photoStockService, PhotoHelper photoHelper)
         {
             _httpClient = httpClient;
+            _photoStockService = photoStockService;
+            _photoHelper = photoHelper;
         }
 
         public async Task<bool> CreateCourseAsync(CourseCreateInput courseCreateInput)
         {
+            var resultPhoto = await _photoStockService.UploadPhoto(courseCreateInput.PhotoFormFile);
+
+            if(resultPhoto != null)
+            {
+                courseCreateInput.Picture = resultPhoto.Url;
+            }
+
+
             var response = await _httpClient.PostAsJsonAsync<CourseCreateInput>("courses", courseCreateInput);
 
             return response.IsSuccessStatusCode;
@@ -58,6 +71,10 @@ namespace ECommerce.Web.Services
 
             var content = await response.Content.ReadFromJsonAsync<Response<List<CourseViewModel>>>();
 
+            content.Data.ForEach(x => {
+                x.StockPictureUrl = _photoHelper.GetPhotoStockUrl(x.Picture);
+            });
+
             return content.Data;
         }
 
@@ -71,6 +88,10 @@ namespace ECommerce.Web.Services
             }
 
             var content = await response.Content.ReadFromJsonAsync<Response<List<CourseViewModel>>>();
+
+            content.Data.ForEach(x => {
+                x.StockPictureUrl = _photoHelper.GetPhotoStockUrl(x.Picture);
+            });
 
             return content.Data;
         }
@@ -86,11 +107,21 @@ namespace ECommerce.Web.Services
 
             var content = await response.Content.ReadFromJsonAsync<Response<CourseViewModel>>();
 
+            content.Data.StockPictureUrl = _photoHelper.GetPhotoStockUrl(content.Data.Picture);
+
             return content.Data;
         }
 
         public async Task<bool> UpdateCourseAsync(CourseUpdateInput courseUpdateInput)
         {
+            var resultPhoto = await _photoStockService.UploadPhoto(courseUpdateInput.PhotoFormFile);
+
+            if (resultPhoto != null)
+            {
+                await _photoStockService.DeletePhoto(courseUpdateInput.Picture);
+                courseUpdateInput.Picture = resultPhoto.Url;
+            }
+
             var response = await _httpClient.PutAsJsonAsync<CourseUpdateInput>("courses", courseUpdateInput);
 
             return response.IsSuccessStatusCode;

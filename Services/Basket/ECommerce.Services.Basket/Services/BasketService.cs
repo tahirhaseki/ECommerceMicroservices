@@ -31,7 +31,7 @@ namespace ECommerce.Services.Basket.Services
 
         public async Task<Response<bool>> SaveOrUpdate(BasketDto basketDto)
         {
-            var status = await _redisService.GetDb().StringSetAsync(basketDto.userId, JsonSerializer.Serialize(basketDto));
+            var status = await _redisService.GetDb().StringSetAsync(basketDto.UserId, JsonSerializer.Serialize(basketDto));
 
             return status ? Response<bool>.Success(204) : Response<bool>.Fail("Basket could not update or save",500);
         }

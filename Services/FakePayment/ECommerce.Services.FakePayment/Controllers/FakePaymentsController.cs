@@ -1,4 +1,5 @@
-﻿using ECommerce.Shared.ControllerBases;
+﻿using ECommerce.Services.FakePayment.Models;
+using ECommerce.Shared.ControllerBases;
 using ECommerce.Shared.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace ECommerce.Services.FakePayment.Controllers
     public class FakePaymentsController : CustomBaseController
     {
         [HttpPost]
-        public IActionResult ReceivePayment()
+        public IActionResult ReceivePayment(PaymentDto paymentDto)
         {
             return CreateActionResultInstance(Response<NoContent>.Success(200));
         }

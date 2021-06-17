@@ -1,8 +1,12 @@
 using ECommerce.Shared.Services;
+using ECommerce.Web.Extensions;
 using ECommerce.Web.Handlers;
+using ECommerce.Web.Helpers;
 using ECommerce.Web.Models;
 using ECommerce.Web.Services;
 using ECommerce.Web.Services.Interfaces;
+using ECommerce.Web.Validators;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,21 +37,14 @@ namespace ECommerce.Web
             services.Configure<ClientSettings>(Configuration.GetSection("ClientSettings"));
             services.AddHttpContextAccessor();
             services.AddAccessTokenManagement();
-            var serviceApiSettings = Configuration.GetSection("ServiceApiSettings").Get<ServiceApiSettings>();
+
+            services.AddSingleton<PhotoHelper>();
 
             services.AddScoped<ResourceOwnerPasswordTokenHandler>();
             services.AddScoped<ClientCredentialTokenHandler>();
-
             services.AddScoped<ISharedIdentityService, SharedIdentityService>();
-            services.AddHttpClient<IIdentityService, IdentityService>();
-            services.AddHttpClient<IClientCredentialTokenService, ClientCredentialTokenService>();
-            services.AddHttpClient<ICatalogService, CatalogService>(options =>
-             {
-                 options.BaseAddress = new Uri($"{serviceApiSettings.GatewayBaseUri}/{serviceApiSettings.Catalog.Path}");
-             }).AddHttpMessageHandler<ClientCredentialTokenHandler>();
-            services.AddHttpClient<IUserService, UserService>(options => {
-                options.BaseAddress = new Uri(serviceApiSettings.IdentityBaseUri);
-            }).AddHttpMessageHandler<ResourceOwnerPasswordTokenHandler>();
+
+            services.AddHttpClientServices(Configuration);
 
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -58,7 +55,8 @@ namespace ECommerce.Web
                         options.Cookie.Name = "ecommerwebcookie";
                     });
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CourseCreateInputValidator>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,6 +70,7 @@ namespace ECommerce.Web
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
             app.UseStaticFiles();
 
             app.UseRouting();
